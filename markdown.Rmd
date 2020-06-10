@@ -1,0 +1,216 @@
+---
+title: "Untitled"
+author: "Kaizad Patel"
+date: "6/7/2020"
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+
+knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,
+                      collapse = TRUE,
+                      comment = "#>",
+                      fig.path = "images/markdown/"
+                      )
+
+source("code/0-vt_packages.R")
+library(ggpubr)
+```
+
+
+```{r gg_setup}
+
+
+gg_vt <- function(data,mapping){
+  ggplot(data,mapping)+
+    geom_vline(xintercept = as.numeric(as.Date("2015-04-12")),linetype="dashed")+
+    geom_vline(xintercept = as.numeric(as.Date("2015-05-04")),linetype="dashed")+
+    geom_vline(xintercept = as.numeric(as.Date("2015-09-20")),linetype="dashed")+
+    geom_vline(xintercept = as.numeric(as.Date("2015-12-15")),linetype="dashed")+
+    geom_vline(xintercept = as.numeric(as.Date("2016-04-10")),linetype="dashed")+
+    geom_vline(xintercept = as.numeric(as.Date("2016-05-12")),linetype="dashed")+
+    
+    annotate("text", label = "\nW", x = as.Date("2015-03-01"), y = Inf,size=4,fontface="bold")+ 
+    annotate("text", label = "\nVT", x = as.Date("2015-04-25"), y = Inf,size=4,fontface="bold")+ 
+    annotate("text", label = "\nGS", x = as.Date("2015-07-20"), y = Inf,size=4,fontface="bold")+ 
+    annotate("text", label = "\nF", x = as.Date("2015-10-30"), y = Inf,size=4,fontface="bold")+ 
+    
+    annotate("text", label = "\nW", x = as.Date("2016-02-15"), y = Inf,size=4,fontface="bold")+ 
+    annotate("text", label = "\nVT", x = as.Date("2016-04-28"), y = Inf,size=4,fontface="bold")+ 
+    annotate("text", label = "\nGS", x = as.Date("2016-06-20"), y = Inf,size=4,fontface="bold")+ 
+    
+    annotate("rect", xmin = as.Date("2015-01-01"), xmax = as.Date("2015-12-30"),
+                  ymin = ymin, ymax = ymax, fill = "grey90", alpha = 1)+
+    annotate("rect", xmin = as.Date("2016-01-02"), xmax = as.Date("2016-08-01"),
+                  ymin = ymin, ymax = ymax, fill = "grey80", alpha = 1)+
+    annotate("text", label = expression(bold("2015")), x = as.Date("2015-06-01"), y = ylabel)+
+    annotate("text", label = expression(bold("2016")), x = as.Date("2016-05-01"), y = ylabel)+
+
+    
+    
+    scale_x_date(#position = "top", 
+                 date_breaks = "2 month",
+                 labels=scales::date_format("%b-%d"),
+                 limits = (c(as.Date("2015-01-01"),as.Date("2016-08-01"))))
+}
+
+```
+
+
+# TEMPERATURE AND SNOWPACK
+
+```{r}
+temp = read.csv("data/processed/temp_movingavg.csv")
+snowpack = read.csv("data/processed/snowpack_depth.csv")
+```
+
+```{r temp_graph}
+
+ylabel = -20; ymin = -18.5; ymax = -21.5
+
+gg_temp = 
+  gg_vt(temp, aes(x = as.Date(Date)))+
+  geom_path(aes(y = air), linetype = "solid")+
+  geom_path(aes(y = org), linetype = "longdash", size=1, color = "brown")+
+  labs(
+   # title = "A",
+    x = "",
+    y = "Temperature, C")+
+  annotate("text", label = "air", x = as.Date("2015-02-20"), y = -15)+
+  annotate("text", label = "O-horizon", x = as.Date("2015-02-01"), y = 2)+
+  theme_kp()+
+  NULL
+
+
+```
+
+```{r snow_graph}
+
+ylabel = -5.5; ymin = -3; ymax = -8
+
+gg_snow = 
+  gg_vt(data = snowpack %>% filter(variable %in% "Survey"),
+            aes(x = as.Date(Date), y = depth_cm))+
+  geom_path()+
+  geom_point(data = snowpack %>% filter(!variable %in% "Survey"),
+            aes(x = as.Date(Date), y = depth_cm),
+            shape = 1, size=2.5)+
+  labs(
+  #  title = "B",
+    x = "",
+    y = "Snowpack depth, cm")+
+
+  theme_kp()+
+  NULL
+
+```
+
+```{r Fig2_temp_snow, fig.height=10, fig.width=10}
+# gg_temp / gg_snow
+
+ggarrange(gg_temp, gg_snow, nrow=2, labels = c("A","B"))
+
+
+```
+
+
+
+
+# SOILS
+
+```{r soil_input}
+soil_n = read.csv("data/processed/soil_n.csv")
+```
+
+```{r}
+ylabel = -10; ymin = -5; ymax = -15
+gg_NH4 = 
+  soil_n %>%
+  group_by(Date_Sampled, Watershed) %>% 
+  dplyr::summarise(NH4 = mean(NH4_mg_kg, na.rm = T),
+                   NH4_se = sd(NH4_mg_kg)/sqrt(n())) %>% 
+  gg_vt(aes(x = as.Date(Date_Sampled), y = NH4, shape = Watershed))+
+  geom_path(size=0.8)+
+  geom_point(size=4, stroke=1)+
+  geom_errorbar(aes(ymax = NH4+NH4_se, ymin = NH4-NH4_se))+
+ # scale_color_manual(values = c("#1d457f", "#f57946"))+
+   scale_shape_manual(values = c(1,16))+
+  
+   labs(
+ #   title = "A",
+    x = "",
+    y = expression(bold("NH"[4]^+{}*"-N, mg"^-1*" kg"^-1)))+
+
+  theme_kp()+
+  NULL
+
+
+
+ylabel = -3; ymin = -2; ymax = -4
+gg_NO3 = 
+  soil_n %>%
+  group_by(Date_Sampled, Watershed) %>% 
+  dplyr::summarise(NO3 = mean(NO3_mg_kg, na.rm = T),
+                   NO3_se = sd(NO3_mg_kg)/sqrt(n())) %>% 
+  gg_vt(aes(x = as.Date(Date_Sampled), y = NO3, shape = Watershed))+
+  geom_path(size=0.8, color = "black")+
+  geom_point(size=4, stroke=1, color = "black")+
+  geom_errorbar(aes(ymax = NO3+NO3_se, ymin = NO3-NO3_se))+
+    scale_color_manual(values = c("#625a94", "#f9ad2a"))+
+   scale_shape_manual(values = c(1,16))+
+    
+    labs(
+#    title = "B",
+    x = "",
+    y = expression(bold("NO"[3]^-{}*"-N, mg"^-1*" kg"^-1)))+
+
+    theme_kp()+
+ 
+    #facet_grid(Horizon ~ Watershed)+
+  NULL
+
+
+```
+
+```{r Fig3_soil_N, fig.height=10, fig.width=10}
+# gg_NH4 / gg_NO3
+
+#library(cowplot)
+#plot_grid(gg_NH4, gg_NO3, nrow = 2, labels = c("A","B"))
+
+ggarrange(gg_NH4, gg_NO3, nrow=2, labels = c("A","B"), common.legend = TRUE, legend="top")
+```
+
+
+
+# STREAMS
+```{r streams_files}
+stream_daily = read.csv("data/processed/streamflow.csv", stringsAsFactors = F)
+stream_n = read.csv("data/processed/stream_n.csv",stringsAsFactors = F)
+
+```
+
+```{r Fig4_streams_graph, fig.width=10, fig.height=5}
+
+ylabel = 143.5; ymin = 144.5; ymax = 142.5
+
+
+gg_vt(stream_daily, aes(x = as.Date(Date), y = gageht_cm))+
+  geom_path()+
+  geom_point(data = stream_n, aes(x = as.Date(Date), y  = NO3_N_mg_L*30 + 145, shape=Watershed), 
+             color = "dodgerblue3", size=2.5)+
+  scale_y_continuous(sec.axis = sec_axis(~(.-145)/30, 
+                                         name = expression(bold("NO"[3]^-{}*"-N, mg"^-1*" L"^-1))), 
+                     limits = c(142.5,175))+
+  scale_shape_manual(values = c(1,16))+
+  labs(
+#    title = "B",
+    x = "",
+    y = expression(bold("Gage height, cm")),
+    shape = "stream nitrate")+
+
+  theme_kp()+
+  NULL
+
+```
+
