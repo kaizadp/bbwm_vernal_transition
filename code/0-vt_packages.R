@@ -36,15 +36,16 @@ library(gsheet)
 # create a custom ggplot theme
 theme_kp <- function() {  # this for all the elements common across plots
   theme_bw() %+replace%
-    theme(legend.position = "top",
+    theme(plot.title = element_text(face="bold", hjust=0, size=14),
+          legend.position = "top",
           legend.key=element_blank(),
-          legend.title = element_blank(),
+          #legend.title = element_blank(),
           legend.text = element_text(size = 12),
           legend.key.size = unit(1.5, 'lines'),
           panel.border = element_rect(color="black",size=1.5, fill = NA),
           
          # plot.title = element_text(hjust = "left", size = 14),
-          axis.text = element_text(size = 14, face = "bold", color = "black"),
+          axis.text = element_text(size = 14, color = "black"),
           axis.title = element_text(size = 14, face = "bold", color = "black"),
           
           # formatting for facets
