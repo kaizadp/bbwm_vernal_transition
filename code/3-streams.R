@@ -73,27 +73,3 @@ stream_n =
 
 write.csv(stream_daily, "data/processed/streamflow.csv", row.names = F)
 write.csv(stream_n, "data/processed/stream_n.csv", row.names = F)
-
-#
-# plot 2 --------------------------------------------------------------
-
-ggplot()+
-  geom_path(data = stream, aes(x = Date, y = discharge_m3_s), size=0.5)+
-  geom_path(data = stream, aes(x = Date, y = gageht_cm/2000), size=0.5)
-
-
-
-ggplot()+
-  geom_path(data = stream, aes(x = Date, y = gageht_cm), size=0.5)+
-  geom_point(data = stream_n, aes(x = as.Date(dates), y = NO3_N*30 + 145, color = Watershed), size = 3)+
-  scale_y_continuous(sec.axis = sec_axis(~(.-145)/30))+
-  
-  #  xlim(("2015-01-01"),("2016-07-01"))+
-  theme_bw()+
-  geom_vline(xintercept = as.numeric(as.Date("2015-04-12")),linetype="dashed")+
-  geom_vline(xintercept = as.numeric(as.Date("2015-05-04")),linetype="dashed")+
-  geom_vline(xintercept = as.numeric(as.Date("2015-09-20")),linetype="dashed")+
-  geom_vline(xintercept = as.numeric(as.Date("2015-12-15")),linetype="dashed")+
-  geom_vline(xintercept = as.numeric(as.Date("2016-04-10")),linetype="dashed")+
-  geom_vline(xintercept = as.numeric(as.Date("2016-05-12")),linetype="dashed")
-
