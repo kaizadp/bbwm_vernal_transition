@@ -19,6 +19,7 @@ home
 |        |---- 3-streams.R
 |
 |---- data/
+|        |---- data_for_EDI/
 |        |---- processed/
 |        |           |---- snowpack_depth.csv
 |        |           |---- soil_n.csv
