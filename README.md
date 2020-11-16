@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/268215809.svg)](https://zenodo.org/badge/latestdoi/268215809)
+
 ## Snowmelt periods as hot moments for soil N dynamics: A case study in Maine, USA
 
 Kaizad F. Patel, Corianne Tatariw, Jean D. MacRae, Tsutomu Ohno, Sarah J. Nelson, Ivan J. Fernandez
